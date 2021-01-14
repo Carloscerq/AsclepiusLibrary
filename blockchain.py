@@ -2,9 +2,10 @@ import hashlib
 import json
 from time import time
 from uuid import uuid4
-
+from urllib.parse import urlparse
 import requests
 from flask import Flask, jsonify, request
+
 
 class Blockchain:
     def __init__(self):
@@ -12,11 +13,12 @@ class Blockchain:
         self.nodes = set()
         self.currentData = []
 
-        #genesis block
+        # genesis block
         self.new_Block(previous_hash='1', proof=100)
 
     def register_node(self, adress):
-        parsed_url = urlparse(address)
+        parsed_url = urlparse(adress)
+
         if parsed_url.netloc:
             self.nodes.add(parsed_url.netloc)
         elif parsed_url.path:
@@ -24,7 +26,7 @@ class Blockchain:
 
     def valid_chain(self, blockchain):
         lastBlock = blockchain[0]
-        
+
         for block in blockchain:
             if block == lastBlock:
                 continue
@@ -35,7 +37,7 @@ class Blockchain:
             lastBlockHash = self.hash(lastBlock)
             if block.previous_hash != lastBlockHash:
                 return False
-            
+
             if not self.valid_proof(lastBlock.proof, block.proof, lastBlockHash):
                 return False
 
@@ -110,7 +112,8 @@ class Blockchain:
 
     @staticmethod
     def valid_proof(last_proof, proof, last_hash):
-        guess_hash = hashlib.sha256(f'{last_proof}{proof}{last_hash}'.encode()).hexdigest()
+        guess_hash = hashlib.sha256(
+            f'{last_proof}{proof}{last_hash}'.encode()).hexdigest()
         return guess_hash[:4] == "0000"
 
 
@@ -120,7 +123,8 @@ node_identifier = str(uuid4()).replace('-', '')
 
 blockchain = Blockchain()
 
-@app.route('/mine', methods=['GET']) #OK
+
+@app.route('/mine', methods=['GET'])  # OK
 def mine():
     last_block = blockchain.last_block
     proof = blockchain.proof_of_work(last_block)
@@ -136,19 +140,23 @@ def mine():
         'previous_hash': block['previous_hash'],
     }), 200
 
-@app.route('/Data/new', methods=['GET'])  #OK
+
+@app.route('/Data/new', methods=['GET'])  # OK
 def new_data():
     DoctorID = request.args.get("Doctorid")
     Data = request.args.get('data')
     Pacient = request.args.get('Pacient')
 
-    blockchain.newData(DoctorID, Pacient,Data)
+    blockchain.newData(DoctorID, Pacient, Data)
     print(DoctorID, Data, Pacient)
 
-    response = {'message': 'New Request send'}
-    return jsonify(blockchain.currentData), 201 
+    response = {'message': 'New Request send',
+                'currentData': blockchain.currentData
+                }
+    return jsonify(response), 201
 
-@app.route('/chain', methods=['GET']) #OK
+
+@app.route('/chain', methods=['GET'])  # OK
 def full_chain():
     response = {
         'chain': blockchain.chain,
@@ -156,22 +164,19 @@ def full_chain():
     }
     return jsonify(response), 200
 
-@app.route('/nodes/register', methods=['POST'])
+
+@app.route('/nodes/register', methods=['GET'])
 def register():
-    values = request.get_json()
-
-    nodes = values.get('nodes')
-    if nodes is None:
-        return "Error: Please supply a valid list of nodes", 400
-
-    for node in nodes:
-        blockchain.register_node(node)
+    newnode = request.args.get('newnode')
 
     response = {
-        'message': 'New nodes have been added',
-        'total_nodes': list(blockchain.nodes),
+        'message': 'your node have been added',
+        'nodes': list(blockchain.nodes)
     }
-    return jsonify(response), 201
+    blockchain.register_node(newnode)
+
+    return jsonify(response), 200
+
 
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
@@ -195,7 +200,8 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
+    parser.add_argument('-p', '--port', default=5000,
+                        type=int, help='port to listen on')
     args = parser.parse_args()
     port = args.port
 
