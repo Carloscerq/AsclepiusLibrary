@@ -6,6 +6,9 @@ from urllib.parse import urlparse
 import requests
 from flask import Flask, jsonify, request
 
+# Só pra facilitar testes
+port = input('port: ')
+
 
 class Blockchain:
     def __init__(self):
@@ -35,10 +38,10 @@ class Blockchain:
             print(block)
 
             lastBlockHash = self.hash(lastBlock)
-            if block.previous_hash != lastBlockHash:
+            if block['previous_hash'] != lastBlockHash:
                 return False
 
-            if not self.valid_proof(lastBlock.proof, block.proof, lastBlockHash):
+            if not self.valid_proof(lastBlock['proof'], block['proof'], lastBlockHash):
                 return False
 
             lastBlock = block
@@ -63,9 +66,19 @@ class Blockchain:
     def sendNewBlock(self, block):
 
         neighbours = self.nodes
+        content = block['data'][0]
+
+        data = {
+            'index': block['index'],
+            'DoctorId': content['DoctorId'],
+            'data': content['data'],
+            'Pacient': content['Pacient'],
+            'proof': block['proof'],
+            'previous_hash': block['previous_hash']
+        }
 
         for node in neighbours:
-            requests.post(f'http://{node}/att/chain', data=jsonify(block))
+            requests.post(f'http://{node}/att/chain', data=data)
 
     def resolve_conflicts(self):
 
@@ -141,7 +154,7 @@ def mine():
 
     blockchain.sendNewBlock(block)
 
-    return jsonify({
+    return json.dumps({
         'message': 'NEW BLOCK',
         'index': block['index'],
         'data': block['data'],
@@ -152,33 +165,18 @@ def mine():
 
 @app.route('/att/chain', methods=['POST'])
 def newBlockchain():
-    doctorID = request.form['DoctorID']
-    Pacient = request.form['Pacient']
-    Data = request.form['data']
-    previous_Hash = request.form['previous_hash']
+
     index = request.form['index']
+    DoctorId = request.form['DoctorId']
+    data = request.form['data']
+    Pacient = request.form['Pacient']
     proof = request.form['proof']
-    timestamp = request.form['timestamp']
-    print(doctorID, Pacient, Data)
+    previou_hash = request.form['previous_hash']
 
-    data = {
-        'doctorID': doctorID,
-        'Pacient': Pacient,
-        'data': Data
-    }
+    blockchain.newData(DoctorId, Pacient, data)
+    blockchain.new_Block(proof, previou_hash)
 
-    new_block = {
-        'data': data,
-        'previous_hash':previous_Hash,
-        'index': int(index),
-        'proof': int(proof),
-        'timestamp': float(timestamp)
-    }
-
-
-    blockchain.chain.append(new_block)
-
-    return jsonify(new_block), 200
+    return jsonify({'a': 'a'})
 
 
 @app.route('/Data/new', methods=['GET'])  # OK
@@ -215,7 +213,23 @@ def register():
     }
     blockchain.register_node(newnode)
 
-    return jsonify(response), 200
+    # Só pra testes
+    myUrl = 'http://localhost:' + port + '/'
+    print(myUrl)
+    requests.get(f'{newnode}/nodes/response?newnode={myUrl}')
+
+    return jsonify(response)
+
+
+@app.route('/nodes/response', methods=['GET'])
+def responsenode():
+    newnode = newnode = request.args.get('newnode')
+
+    blockchain.register_node(newnode)
+
+    return jsonify({
+        'message': 'your node has been added'
+    })
 
 
 @app.route('/nodes/resolve', methods=['GET'])
@@ -235,18 +249,16 @@ def consensus():
 
     return jsonify(response), 200
 
-PORTVALUE = ''
 
 if __name__ == '__main__':
-    timeInit = time()
+    '''
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument('-p', '--port', default=5000,
                         type=int, help='port to listen on')
-    args = parser.parse_args()
-    port = args.port
-    PORTVALUE = port
-    print(PORTVALUE)
+    args = parser.parse_args()'''
+
+    #port = args.port
 
     app.run(host='0.0.0.0', port=port)

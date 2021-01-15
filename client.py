@@ -1,6 +1,6 @@
 from tkinter import *
 import requests
-from clientfunctions import createdata, url, blockchainGetData
+from clientfunctions import createdata, url, blockchainGetData, addNode
 
 requests.get(f'{url}/nodes/resolve')
 root = Tk()
@@ -36,10 +36,25 @@ def getDataWindow():
         Label(top, text=block['data']).pack()
 
 
+def addNodeWindow():
+    top = Toplevel()
+    top.title("Add Node")
+    top.geometry('200x200')
+    LabelNode = Label(top, text="Node name: ").pack()
+    nodeInput = Entry(top)
+    nodeInput.pack()
+    confirmButton = Button(top, text="Add Node",
+                           command=lambda: addNode(nodeInput.get()))
+    confirmButton.pack()
+
+
 createdataButton = Button(root, text='Create Data', command=createdataWindow)
 createdataButton.pack()
 
 getDataButton = Button(root, text='See Data', command=getDataWindow)
 getDataButton.pack()
+
+createnodeButton = Button(root, text='Add Node', command=addNodeWindow)
+createnodeButton.pack()
 
 root.mainloop()

@@ -1,7 +1,7 @@
 import requests
+from blockchain import port
 
-
-url = 'http://localhost:5000/'
+url = f'http://localhost:{port}/'
 
 
 def createdata(doctorID, Pacient, data):
@@ -12,6 +12,18 @@ def createdata(doctorID, Pacient, data):
 
     return block
 
+
 def blockchainGetData():
+    requests.get(f'{url}/nodes/resolve')
     response = requests.get(f'{url}/chain')
     return response.json()['chain']
+
+
+def addNode(node):
+    print(url)
+    response = requests.get(f'{url}/nodes/register?newnode={node}')
+    nodeList = response.json()['nodes']
+    for node in nodeList:
+        requests.get(f'{url}/nodes/register?newnode={node}')
+
+    print(response.json()['message'])
