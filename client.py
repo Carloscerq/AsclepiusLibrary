@@ -2,7 +2,6 @@ from tkinter import *
 import requests
 from clientfunctions import createdata, url, blockchainGetData, addNode
 
-requests.get(f'{url}/nodes/resolve')
 root = Tk()
 root.title("Asclepius Library")
 root.geometry("500x500")
@@ -57,4 +56,5 @@ getDataButton.pack()
 createnodeButton = Button(root, text='Add Node', command=addNodeWindow)
 createnodeButton.pack()
 
-root.mainloop()
+if __name__ == '__main__':
+    root.mainloop()
