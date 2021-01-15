@@ -1,7 +1,8 @@
 from tkinter import *
-from flask import Flask, jsonify, request
-from clientfunctions import createdata
+import requests
+from clientfunctions import createdata, url, blockchainGetData
 
+requests.get(f'{url}/nodes/resolve')
 root = Tk()
 root.title("Asclepius Library")
 root.geometry("500x500")
@@ -25,11 +26,20 @@ def createdataWindow():
         doctorIDinput.get(), pacientInput.get(), dataInput.get()))
     confirmButton.pack()
 
+
 def getDataWindow():
-    
+    top = Toplevel()
+    top.title("Get Data")
+    top.geometry('400x400')
+    blockchain = blockchainGetData()
+    for block in blockchain:
+        Label(top, text=block['data']).pack()
 
 
-myButton = Button(root, text='Create Data', command=createdataWindow)
-myButton.pack()
+createdataButton = Button(root, text='Create Data', command=createdataWindow)
+createdataButton.pack()
+
+getDataButton = Button(root, text='See Data', command=getDataWindow)
+getDataButton.pack()
 
 root.mainloop()

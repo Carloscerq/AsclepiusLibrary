@@ -235,6 +235,7 @@ def consensus():
 
     return jsonify(response), 200
 
+PORTVALUE = ''
 
 if __name__ == '__main__':
     timeInit = time()
@@ -245,5 +246,7 @@ if __name__ == '__main__':
                         type=int, help='port to listen on')
     args = parser.parse_args()
     port = args.port
+    PORTVALUE = port
+    print(PORTVALUE)
 
     app.run(host='0.0.0.0', port=port)
