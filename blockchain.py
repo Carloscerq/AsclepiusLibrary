@@ -1,3 +1,5 @@
+from tkinter import *
+from argparse import ArgumentParser
 import hashlib
 import json
 from time import time
@@ -5,9 +7,10 @@ from uuid import uuid4
 from urllib.parse import urlparse
 import requests
 from flask import Flask, jsonify, request
+from multiprocessing import Process, current_process
 
 # Só pra facilitar testes
-port = input('port: ')
+#port = input('port: ')
 
 
 class Blockchain:
@@ -250,15 +253,102 @@ def consensus():
     return jsonify(response), 200
 
 
+parser = ArgumentParser()
+parser.add_argument('-p', '--port', default=5000,
+                    type=int, help='port to listen on')
+args = parser.parse_args()
+
+port = args.port
+
+url = f'http://localhost:{port}/'
+
+
+def createdata(doctorID, Pacient, data):
+    requests.get(f'{url}/nodes/resolve')
+    requests.get(
+        f'{url}/Data/new?Doctorid={doctorID}&data={data}&Pacient={Pacient}')
+    block = requests.get(f'{url}/mine')
+
+    return block
+
+
+def blockchainGetData():
+    requests.get(f'{url}/nodes/resolve')
+    response = requests.get(f'{url}/chain')
+    return response.json()['chain']
+
+
+def addNode(node):
+    print(url)
+    response = requests.get(f'{url}/nodes/register?newnode={node}')
+    nodeList = response.json()['nodes']
+    for node in nodeList:
+        requests.get(f'{url}/nodes/register?newnode={node}')
+
+    print(response.json()['message'])
+
+
+root = Tk()
+root.title("Asclepius Library")
+root.geometry("500x500")
+
+
+def createdataWindow():
+    top = Toplevel()
+    top.title("Create Data")
+    top.geometry('400x400')
+    myLabel = Label(top, text="Doctor ID: ").pack()
+    doctorIDinput = Entry(top, width=50)
+    doctorIDinput.pack()
+    myLabel2 = Label(top, text="Pacient: ").pack()
+    pacientInput = Entry(top, width=50)
+    pacientInput.pack()
+    myLabel3 = Label(top, text="Data: ").pack()
+    dataInput = Entry(top, width=50)
+    dataInput.pack()
+
+    confirmButton = Button(top, text="Confirm", command=lambda: createdata(
+        doctorIDinput.get(), pacientInput.get(), dataInput.get()))
+    confirmButton.pack()
+
+
+def getDataWindow():
+    top = Toplevel()
+    top.title("Get Data")
+    top.geometry('400x400')
+    blockchain = blockchainGetData()
+    for block in blockchain:
+        Label(top, text=block['data']).pack()
+
+
+def addNodeWindow():
+    top = Toplevel()
+    top.title("Add Node")
+    top.geometry('200x200')
+    LabelNode = Label(top, text="Node name: ").pack()
+    nodeInput = Entry(top)
+    nodeInput.pack()
+    confirmButton = Button(top, text="Add Node",
+                           command=lambda: addNode(nodeInput.get()))
+    confirmButton.pack()
+
+
+createdataButton = Button(root, text='Create Data', command=createdataWindow)
+createdataButton.pack()
+
+getDataButton = Button(root, text='See Data', command=getDataWindow)
+getDataButton.pack()
+
+createnodeButton = Button(root, text='Add Node', command=addNodeWindow)
+createnodeButton.pack()
+
+
 if __name__ == '__main__':
-    '''
-    from argparse import ArgumentParser
 
-    parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000,
-                        type=int, help='port to listen on')
-    args = parser.parse_args()'''
+    pr1 = Process(target=lambda: app.run(host='0.0.0.0', port=port))
+    pr1.start()
+    pr2 = Process(target=root.mainloop)
+    pr2.start()
+    #app.run(host='0.0.0.0', port=port)
+    #root.mainloop()
 
-    #port = args.port
-
-    app.run(host='0.0.0.0', port=port)
