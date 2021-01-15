@@ -60,6 +60,13 @@ class Blockchain:
         self.chain.append(block)
         return block
 
+    def sendNewBlock(self, block):
+
+        neighbours = self.nodes
+
+        for node in neighbours:
+            requests.post(f'http://{node}/att/chain', data=jsonify(block))
+
     def resolve_conflicts(self):
 
         neighbours = self.nodes
@@ -67,7 +74,7 @@ class Blockchain:
         newChain = None
 
         for node in neighbours:
-            response = requests.get(f'{node}/chain')
+            response = requests.get(f'http://{node}/chain')
 
             if response.status_code == 200:
                 length = response.json()['length']
@@ -132,6 +139,8 @@ def mine():
     previous_hash = blockchain.hash(last_block)
     block = blockchain.new_Block(proof, previous_hash)
 
+    blockchain.sendNewBlock(block)
+
     return jsonify({
         'message': 'NEW BLOCK',
         'index': block['index'],
@@ -139,6 +148,37 @@ def mine():
         'proof': block['proof'],
         'previous_hash': block['previous_hash'],
     }), 200
+
+
+@app.route('/att/chain', methods=['POST'])
+def newBlockchain():
+    doctorID = request.form['DoctorID']
+    Pacient = request.form['Pacient']
+    Data = request.form['data']
+    previous_Hash = request.form['previous_hash']
+    index = request.form['index']
+    proof = request.form['proof']
+    timestamp = request.form['timestamp']
+    print(doctorID, Pacient, Data)
+
+    data = {
+        'doctorID': doctorID,
+        'Pacient': Pacient,
+        'data': Data
+    }
+
+    new_block = {
+        'data': data,
+        'previous_hash':previous_Hash,
+        'index': int(index),
+        'proof': int(proof),
+        'timestamp': float(timestamp)
+    }
+
+
+    blockchain.chain.append(new_block)
+
+    return jsonify(new_block), 200
 
 
 @app.route('/Data/new', methods=['GET'])  # OK
@@ -197,6 +237,7 @@ def consensus():
 
 
 if __name__ == '__main__':
+    timeInit = time()
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
