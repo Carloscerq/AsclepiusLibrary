@@ -9,7 +9,7 @@ from multiprocessing import Process
 from client import root
 
 # Só pra facilitar testes
-#port = input('port: ')
+port = 5000
 
 
 class Blockchain:
@@ -253,15 +253,15 @@ def consensus():
 
 
 if __name__ == '__main__':
-    
-    from argparse import ArgumentParser
+
+    '''from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument('-p', '--port', default=5000,
                         type=int, help='port to listen on')
     args = parser.parse_args()
 
-    port = args.port
+    port = args.port'''
 
     pr1 = Process(target=lambda: app.run(host='0.0.0.0', port=port))
     pr1.start()

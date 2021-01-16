@@ -1,5 +1,4 @@
 from tkinter import *
-import requests
 from clientfunctions import createdata, url, blockchainGetData, addNode
 
 root = Tk()
@@ -25,12 +24,17 @@ def createdataWindow():
         doctorIDinput.get(), pacientInput.get(), dataInput.get()))
     confirmButton.pack()
 
+    closeButton = Button(top, text="Close", command=top.destroy)
+    closeButton.pack()
+
 
 def getDataWindow():
     top = Toplevel()
     top.title("Get Data")
     top.geometry('400x400')
     blockchain = blockchainGetData()
+    closeButton = Button(top, text="Close", command=top.destroy)
+    closeButton.pack()
     for block in blockchain:
         Label(top, text=block['data']).pack()
 
@@ -45,6 +49,8 @@ def addNodeWindow():
     confirmButton = Button(top, text="Add Node",
                            command=lambda: addNode(nodeInput.get()))
     confirmButton.pack()
+    closeButton = Button(top, text="Close", command=top.destroy)
+    closeButton.pack()
 
 
 createdataButton = Button(root, text='Create Data', command=createdataWindow)
