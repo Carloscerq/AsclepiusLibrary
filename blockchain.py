@@ -7,9 +7,10 @@ import requests
 from flask import Flask, jsonify, request
 from multiprocessing import Process
 from client import root
-
+from const import PORT as port
+from const import URL as url
 # Só pra facilitar testes
-port = 5000
+#port = 5000
 
 
 class Blockchain:

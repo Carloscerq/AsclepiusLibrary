@@ -1,7 +1,6 @@
 import requests
-port = 5000
-
-url = f'http://localhost:{port}/'
+from const import PORT as port
+from const import URL as url
 
 
 def createdata(doctorID, Pacient, data):
