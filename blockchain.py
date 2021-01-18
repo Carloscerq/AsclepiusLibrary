@@ -16,7 +16,9 @@ class Blockchain:
         self.chain = []
         self.nodes = set()
         self.currentData = []
+        self.CanWriteNodes = set()
 
+        self.CanWriteNodes.add('http://localhost:5000/')
         # genesis block
         self.new_Block(previous_hash='1', proof=100)
 
@@ -79,7 +81,7 @@ class Blockchain:
         }
 
         for node in neighbours:
-            requests.post(f'http://{node}/att/chain', data=data)
+            requests.post(f'http://{node}/att/chain?node={url}', data=data)
 
     def resolve_conflicts(self):
 
@@ -123,6 +125,14 @@ class Blockchain:
 
         return proof
 
+    def NodeCanAtt(self, url):
+        for node in self.CanWriteNodes:
+            if url == node:
+                return True
+            
+        return False
+
+
     @property
     def last_block(self):
         return self.chain[-1]
@@ -164,6 +174,26 @@ def mine():
     }), 200
 
 
+@app.route('/att/chain', methods=['POST'])
+def newBlockchain():
+    index = request.form['index']
+    DoctorId = request.form['DoctorId']
+    data = request.form['data']
+    Pacient = request.form['Pacient']
+    proof = request.form['proof']
+    previou_hash = request.form['previous_hash']
+    urlWrite = request.args.get('node')
+    print(urlWrite)
+    canAtt = blockchain.NodeCanAtt(urlWrite)
+    print(canAtt)
+    if canAtt:
+        blockchain.newData(DoctorId, Pacient, data)
+        blockchain.new_Block(proof, previou_hash)
+        return jsonify({'message': 'the node has been updated'})
+    else:
+        return jsonify({'message': "you dont have permission"})
+
+
 @app.route('/Data/new', methods=['GET'])  # OK
 def new_data():
     DoctorID = request.args.get("Doctorid")
@@ -194,14 +224,13 @@ def register():
 
     response = {
         'message': 'your node have been added',
-        'nodes': list(blockchain.nodes)
+        'nodes': list(blockchain.nodes),
+        'CanWriteNodes:' list(blockchain.CanWriteNodes)
     }
     blockchain.register_node(newnode)
 
-    # Só pra testes
-    myUrl = 'http://localhost:' + port + '/'
-    print(myUrl)
-    requests.get(f'{newnode}/nodes/response?newnode={myUrl}')
+
+    requests.get(f'{newnode}/nodes/response?newnode={url}')
 
     return jsonify(response)
 
@@ -233,6 +262,10 @@ def consensus():
         }
 
     return jsonify(response), 200
+
+@app.route('/nodes/givePermission', methods=['POST'])
+def givePermission():
+
 
 
 if __name__ == '__main__':
