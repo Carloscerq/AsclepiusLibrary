@@ -41,8 +41,9 @@ def blockchainGetData(key):
 
 
 def addNode(node):
-    print(url)
+    requests.get(f'{url}/nodes/resolve')
     response = requests.get(f'{url}/nodes/register?newnode={node}')
+    print(response.json()['nodes'])
     nodeList = response.json()['nodes']
     for node in nodeList:
         requests.get(f'{url}/nodes/register?newnode={node}')
@@ -54,3 +55,10 @@ def newKey():
     key = Fernet.generate_key().decode('utf-8')
     print(key)
     return key
+
+def gainPermission():
+    requests.get(f'{url}/nodes/resolve')
+    response = requests.get(f'{url}/nodes')
+    nodeList = response.json()['nodes']
+    for node in nodeList:
+        requests.get(f'http://{node}/nodes/getpermission?url={url}')

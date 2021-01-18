@@ -1,5 +1,5 @@
 from tkinter import *
-from clientfunctions import createdata, url, blockchainGetData, addNode, newKey
+from clientfunctions import createdata, url, blockchainGetData, addNode, newKey, gainPermission
 
 root = Tk()
 root.title("Asclepius Library")
@@ -81,6 +81,9 @@ createnodeButton.pack()
 createKeyButton = Button(
     root, text="Create new Key pair", command=createKeyWindow)
 createKeyButton.pack()
+
+gainPermissionButton = Button(root, text="Gain permission", command=gainPermission)
+gainPermissionButton.pack()
 
 if __name__ == '__main__':
     root.mainloop()

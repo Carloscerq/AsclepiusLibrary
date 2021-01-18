@@ -129,9 +129,8 @@ class Blockchain:
         for node in self.CanWriteNodes:
             if url == node:
                 return True
-            
-        return False
 
+        return False
 
     @property
     def last_block(self):
@@ -174,6 +173,15 @@ def mine():
     }), 200
 
 
+@app.route('/chain', methods=['GET'])  # OK
+def full_chain():
+    response = {
+        'chain': blockchain.chain,
+        'length': len(blockchain.chain),
+    }
+    return jsonify(response), 200
+
+
 @app.route('/att/chain', methods=['POST'])
 def newBlockchain():
     index = request.form['index']
@@ -209,13 +217,13 @@ def new_data():
     return jsonify(response), 201
 
 
-@app.route('/chain', methods=['GET'])  # OK
-def full_chain():
+@app.route('/nodes', methods=['GET'])
+def nodes():
     response = {
-        'chain': blockchain.chain,
-        'length': len(blockchain.chain),
+        'message': 'your node have been added',
+        'nodes': list(blockchain.nodes)
     }
-    return jsonify(response), 200
+    return jsonify(response)
 
 
 @app.route('/nodes/register', methods=['GET'])
@@ -264,18 +272,15 @@ def consensus():
 
     return jsonify(response), 200
 
+@app.route('/nodes/getpermission', methods=['GET'])
+def getpermission():
+    url = request.args.get('url')
+    blockchain.CanWriteNodes.add(url)
+
+    return jsonify({'message': 'added'})
+
 
 if __name__ == '__main__':
-
-    '''from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000,
-                        type=int, help='port to listen on')
-    args = parser.parse_args()
-
-    port = args.port'''
-
     pr1 = Process(target=lambda: app.run(host='0.0.0.0', port=port))
     pr1.start()
     pr2 = Process(target=root.mainloop())
