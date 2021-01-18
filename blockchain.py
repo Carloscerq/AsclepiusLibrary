@@ -9,8 +9,6 @@ from multiprocessing import Process
 from client import root
 from const import PORT as port
 from const import URL as url
-# Só pra facilitar testes
-#port = 5000
 
 
 class Blockchain:
@@ -164,22 +162,6 @@ def mine():
         'proof': block['proof'],
         'previous_hash': block['previous_hash'],
     }), 200
-
-
-@app.route('/att/chain', methods=['POST'])
-def newBlockchain():
-
-    index = request.form['index']
-    DoctorId = request.form['DoctorId']
-    data = request.form['data']
-    Pacient = request.form['Pacient']
-    proof = request.form['proof']
-    previou_hash = request.form['previous_hash']
-
-    blockchain.newData(DoctorId, Pacient, data)
-    blockchain.new_Block(proof, previou_hash)
-
-    return jsonify({'a': 'a'})
 
 
 @app.route('/Data/new', methods=['GET'])  # OK

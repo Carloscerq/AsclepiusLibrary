@@ -1,5 +1,5 @@
 from tkinter import *
-from clientfunctions import createdata, url, blockchainGetData, addNode
+from clientfunctions import createdata, url, blockchainGetData, addNode, newKey
 
 root = Tk()
 root.title("Asclepius Library")
@@ -19,9 +19,12 @@ def createdataWindow():
     myLabel3 = Label(top, text="Data: ").pack()
     dataInput = Entry(top, width=50)
     dataInput.pack()
+    myLabel4 = Label(top, text="Key").pack()
+    keyInput = Entry(top, width=200)
+    keyInput.pack()
 
     confirmButton = Button(top, text="Confirm", command=lambda: createdata(
-        doctorIDinput.get(), pacientInput.get(), dataInput.get()))
+        doctorIDinput.get(), pacientInput.get(), dataInput.get(), keyInput.get()))
     confirmButton.pack()
 
     closeButton = Button(top, text="Close", command=top.destroy)
@@ -32,11 +35,14 @@ def getDataWindow():
     top = Toplevel()
     top.title("Get Data")
     top.geometry('400x400')
-    blockchain = blockchainGetData()
+    keyLabel = Label(top, text="Key:").pack()
+    keyInput = Entry(top)
+    keyInput.pack()
+    getDataButton = Button(top, text="Get data",
+                           command=lambda: blockchainGetData(keyInput.get()))
+    getDataButton.pack()
     closeButton = Button(top, text="Close", command=top.destroy)
     closeButton.pack()
-    for block in blockchain:
-        Label(top, text=block['data']).pack()
 
 
 def addNodeWindow():
@@ -53,6 +59,16 @@ def addNodeWindow():
     closeButton.pack()
 
 
+def createKeyWindow():
+    top = Toplevel()
+    top.title("New Key")
+    top.geometry('1200x200')
+    key = newKey()
+    Label(top, text=f"NEW KEY: {key}").pack()
+    closeButton = Button(top, text="Close", command=top.destroy)
+    closeButton.pack()
+
+
 createdataButton = Button(root, text='Create Data', command=createdataWindow)
 createdataButton.pack()
 
@@ -61,6 +77,10 @@ getDataButton.pack()
 
 createnodeButton = Button(root, text='Add Node', command=addNodeWindow)
 createnodeButton.pack()
+
+createKeyButton = Button(
+    root, text="Create new Key pair", command=createKeyWindow)
+createKeyButton.pack()
 
 if __name__ == '__main__':
     root.mainloop()
