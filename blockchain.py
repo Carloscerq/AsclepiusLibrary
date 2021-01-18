@@ -224,13 +224,14 @@ def register():
 
     response = {
         'message': 'your node have been added',
-        'nodes': list(blockchain.nodes),
-        'CanWriteNodes:' list(blockchain.CanWriteNodes)
+        'nodes': list(blockchain.nodes)
     }
     blockchain.register_node(newnode)
 
-
-    requests.get(f'{newnode}/nodes/response?newnode={url}')
+    # Só pra testes
+    myUrl = 'http://localhost:' + port + '/'
+    print(myUrl)
+    requests.get(f'{newnode}/nodes/response?newnode={myUrl}')
 
     return jsonify(response)
 
@@ -262,10 +263,6 @@ def consensus():
         }
 
     return jsonify(response), 200
-
-@app.route('/nodes/givePermission', methods=['POST'])
-def givePermission():
-
 
 
 if __name__ == '__main__':
