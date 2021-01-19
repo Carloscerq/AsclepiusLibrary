@@ -42,13 +42,12 @@ def blockchainGetData(key):
 
 def addNode(node):
     requests.get(f'{url}/nodes/resolve')
-    response = requests.get(f'{url}/nodes/register?newnode={node}')
-    print(response.json()['nodes'])
+    response = requests.get(f'{node}/nodes/register?newnode={url}')
+    print(response.json())
     nodeList = response.json()['nodes']
     for node in nodeList:
-        requests.get(f'{url}/nodes/register?newnode={node}')
+        requests.get(f'http://{node}/nodes/register?newnode={url}')
 
-    print(response.json()['message'])
 
 
 def newKey():
