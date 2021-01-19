@@ -1,3 +1,4 @@
+#Apenas coisas relacionadas à interface grafica
 from tkinter import *
 from clientfunctions import createdata, url, blockchainGetData, addNode, newKey, gainPermission
 
@@ -79,7 +80,7 @@ createnodeButton = Button(root, text='Add Node', command=addNodeWindow)
 createnodeButton.pack()
 
 createKeyButton = Button(
-    root, text="Create new Key pair", command=createKeyWindow)
+    root, text="Create new Key", command=createKeyWindow)
 createKeyButton.pack()
 
 gainPermissionButton = Button(root, text="Gain permission", command=gainPermission)

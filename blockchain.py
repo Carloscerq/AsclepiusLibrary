@@ -12,17 +12,21 @@ from const import URL as url
 
 
 class Blockchain:
+#Classe responsavel por armazenar os dados além de testar se esta tudo certo com eles
     def __init__(self):
         self.chain = []
         self.nodes = set()
         self.currentData = []
         self.CanWriteNodes = set()
 
+
+        #Primeiro node com permissão pra escrever, apenas pra testes
         self.CanWriteNodes.add('http://localhost:5000/')
         # genesis block
         self.new_Block(previous_hash='1', proof=100)
 
     def register_node(self, adress):
+        #Faz com que todos os nodes sejam armazenados de forma igual
         parsed_url = urlparse(adress)
 
         if parsed_url.netloc:
@@ -84,7 +88,8 @@ class Blockchain:
             requests.post(f'http://{node}/att/chain?node={url}', data=data)
 
     def resolve_conflicts(self):
-
+        #Valida se as chains dos vizinhos são validas e tem um comprimento maior que a nossa.
+        #Assim, se ela possuir esses dois fatores substitui a nossa pela nova maior 
         neighbours = self.nodes
         biggestLen = len(self.chain)
         newChain = None
@@ -120,6 +125,7 @@ class Blockchain:
         last_hash = self.hash(last_block)
 
         proof = 0
+        #Faz a validação pra ver se o bloco tem uma proof que cumpre os requisitos  
         while self.valid_proof(last_proof, proof, last_hash) is False:
             proof = proof + 1
 
@@ -204,17 +210,21 @@ def newBlockchain():
 
 @app.route('/Data/new', methods=['GET'])  # OK
 def new_data():
-    DoctorID = request.args.get("Doctorid")
-    Data = request.args.get('data')
-    Pacient = request.args.get('Pacient')
+    for node in list(blockchain.CanWriteNodes):
+        if node == url:
+            DoctorID = request.args.get("Doctorid")
+            Data = request.args.get('data')
+            Pacient = request.args.get('Pacient')
 
-    blockchain.newData(DoctorID, Pacient, Data)
-    print(DoctorID, Data, Pacient)
+            blockchain.newData(DoctorID, Pacient, Data)
+            print(DoctorID, Data, Pacient)
 
-    response = {'message': 'New Request send',
-                'currentData': blockchain.currentData
-                }
-    return jsonify(response), 201
+            response = {'message': 'New Request send',
+                        'currentData': blockchain.currentData
+                        }
+            return jsonify(response), 201
+
+    return jsonify({'message': "can't write"})
 
 
 @app.route('/nodes', methods=['GET'])
