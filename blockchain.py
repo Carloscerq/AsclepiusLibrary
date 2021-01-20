@@ -162,21 +162,25 @@ blockchain = Blockchain()
 
 @app.route('/mine', methods=['GET'])  # OK
 def mine():
-    last_block = blockchain.last_block
-    proof = blockchain.proof_of_work(last_block)
+    for node in list(blockchain.CanWriteNodes):
+        if node == url:
+            last_block = blockchain.last_block
+            proof = blockchain.proof_of_work(last_block)
 
-    previous_hash = blockchain.hash(last_block)
-    block = blockchain.new_Block(proof, previous_hash)
+            previous_hash = blockchain.hash(last_block)
+            block = blockchain.new_Block(proof, previous_hash)
 
-    blockchain.sendNewBlock(block)
+            blockchain.sendNewBlock(block)
 
-    return json.dumps({
-        'message': 'NEW BLOCK',
-        'index': block['index'],
-        'data': block['data'],
-        'proof': block['proof'],
-        'previous_hash': block['previous_hash'],
-    }), 200
+            return json.dumps({
+                'message': 'NEW BLOCK',
+                'index': block['index'],
+                'data': block['data'],
+                'proof': block['proof'],
+                'previous_hash': block['previous_hash'],
+            }), 200
+
+    return jsonify({'message': "cant write"})
 
 
 @app.route('/chain', methods=['GET'])  # OK
